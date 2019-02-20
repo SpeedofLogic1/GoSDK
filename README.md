@@ -1,2 +1,2 @@
 # GoSDK
-Go SOL Azure SDK
+Go SOL Azure SDK (very early days)
