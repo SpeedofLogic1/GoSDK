@@ -5,26 +5,33 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+
+	"github.com/skratchdot/open-golang/open"
 	"golang.org/x/oauth2"
 )
 
 var (
 	azureAuthConfig  *oauth2.Config
 	oauthStateString = "pseudo-random"
-	// AzureEndpoint is a representation of a AzureEndpoint
-	AzureEndpoint = oauth2.Endpoint{
-		AuthURL:   "https://login.microsoftonline.com/zzz/oauth2/v2.0/authorize",
-		TokenURL:  "https://login.microsoftonline.com/zz/oauth2/v2.0/token",
-		AuthStyle: oauth2.AuthStyleInParams,
-	}
 )
 
 // called automaticly I believe
 func init() {
+	log.Print(os.Getenv("CLIENT_ID"))
+	log.Print(os.Getenv("CLIENT_SECRET"))
+	log.Print(os.Getenv("AUTH"))
+	log.Print(os.Getenv("TOKEN"))
+	var AzureEndpoint = oauth2.Endpoint{
+		AuthURL:   os.Getenv("AUTH"),
+		TokenURL:  os.Getenv("TOKEN"),
+		AuthStyle: oauth2.AuthStyleInParams,
+	}
+
 	azureAuthConfig = &oauth2.Config{
 		RedirectURL:  "http://localhost:8080/client",
-		ClientID:     "zzz",
-		ClientSecret: "zz",
+		ClientID:     os.Getenv("CLIENT_ID"),
+		ClientSecret: os.Getenv("CLIENT_SECRET"),
 		Scopes:       []string{"User.Read.All"},
 		Endpoint:     AzureEndpoint,
 	}
@@ -82,6 +89,7 @@ func main() {
 	http.HandleFunc("/", handleMain)
 	http.HandleFunc("/client", handleCallback)
 	http.HandleFunc("/login", handleLogin)
+	url := azureAuthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
+	open.Run(url)
 	http.ListenAndServe(":8080", nil)
 }
- 
